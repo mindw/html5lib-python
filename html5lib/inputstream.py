@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from six import text_type, binary_type
+from six import text_type, binary_type, BytesIO
 from six.moves import http_client, urllib
 
 import codecs
@@ -8,22 +8,11 @@ import re
 
 import webencodings
 
-from .constants import EOF, spaceCharacters, asciiLetters, asciiUppercase
-from .constants import ReparseException
+from .constants import (
+    EOF, spaceCharacters, asciiLetters, asciiUppercase, ReparseException)
 from . import utils
 
 from io import StringIO
-
-try:
-    from io import BytesIO
-except ImportError:
-    BytesIO = StringIO
-
-try:
-    from io import BufferedIOBase
-except ImportError:
-    class BufferedIOBase(object):
-        pass
 
 # Non-unicode versions of constants for use in the pre-parser
 spaceCharactersBytes = frozenset([item.encode("ascii") for item in spaceCharacters])
