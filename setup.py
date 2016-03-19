@@ -1,7 +1,7 @@
 import codecs
 from os.path import join, dirname
 from setuptools import setup, find_packages
-
+import sys
 
 classifiers=[
     'Development Status :: 5 - Production/Stable',
@@ -34,6 +34,36 @@ with open(join(here, 'html5lib', '__init__.py')) as fp:
             version = _locals['__version__']
             break
 
+install_requires=[
+    'six',
+    'webencodings'
+]
+extras_require = {
+    # A empty extra that only has a conditional marker will be
+    # unconditonally installed when the condition matches.
+    ":python_version == '2.6'": ["ordereddict"],
+
+    # A conditional extra will only install these items when the extra is
+    # requested and the condition matches.
+    "datrie:platform_python_implementation == 'CPython'": ["datrie"],
+    "lxml:platform_python_implementation == 'CPython'": ["lxml"],
+
+    # Standard extras, will be installed when the extra is requested.
+    "genshi": ["genshi"],
+    "chardet": ["chardet>=2.2"],
+
+    # The all extra combines a standard extra which will be used anytime
+    # the all extra is requested, and it extends it with a conditional
+    # extra that will be installed whenever the condition matches and the
+    # all extra is requested.
+    'all': ["genshi", "chardet>=2.2"],
+    "all:platform_python_implementation == 'CPython'": ["datrie", "lxml"],
+    'doc': ['sphinx']
+}
+
+needs_sphinx = {'release', 'build_sphinx', 'upload_docs'}.intersection(sys.argv)
+sphinx = install_requires + sorted(set(sum(extras_require.values(), []))) if needs_sphinx else []
+
 setup(name='html5lib',
       version=version,
       url='https://github.com/html5lib/html5lib-python',
@@ -44,29 +74,7 @@ setup(name='html5lib',
       maintainer='James Graham',
       maintainer_email='james@hoppipolla.co.uk',
       packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-      install_requires=[
-          'six',
-          'webencodings',
-      ],
-      extras_require={
-          # A empty extra that only has a conditional marker will be
-          # unconditonally installed when the condition matches.
-          ":python_version == '2.6'": ["ordereddict"],
-
-          # A conditional extra will only install these items when the extra is
-          # requested and the condition matches.
-          "datrie:platform_python_implementation == 'CPython'": ["datrie"],
-          "lxml:platform_python_implementation == 'CPython'": ["lxml"],
-
-          # Standard extras, will be installed when the extra is requested.
-          "genshi": ["genshi"],
-          "chardet": ["chardet>=2.2"],
-
-          # The all extra combines a standard extra which will be used anytime
-          # the all extra is requested, and it extends it with a conditional
-          # extra that will be installed whenever the condition matches and the
-          # all extra is requested.
-          "all": ["genshi", "chardet>=2.2"],
-          "all:platform_python_implementation == 'CPython'": ["datrie", "lxml"],
-      },
+      install_requires=install_requires,
+      setup_requires=['setuptools>=20.3'] + sphinx,
+      extras_require=extras_require,
       )
